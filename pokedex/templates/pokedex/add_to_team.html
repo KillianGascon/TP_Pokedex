@@ -1,0 +1,81 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}Ajouter à {{ team.name }} - Pokédex{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1 style="margin: 0; font-size: 1.8rem;">➕ Ajouter à {{ team.name }}</h1>
+    <a href="{% url 'pokedex:team_list' %}" class="btn" style="background: linear-gradient(135deg, #555, #333);">←
+        Retour</a>
+</div>
+
+<!-- Debug info: Count is {{ team.pokemons.count }} -->
+
+{% if team.pokemons.count >= 5 %}
+<div
+    style="padding: 1.5rem; background: rgba(255, 152, 0, 0.15); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 12px; margin-bottom: 2rem;">
+    <strong>⚠️ Équipe complète!</strong> Cette équipe a déjà 5 Pokémon.
+</div>
+{% else %}
+<div
+    style="padding: 1rem; background: rgba(76, 110, 245, 0.15); border: 1px solid rgba(76, 110, 245, 0.3); border-radius: 12px; margin-bottom: 2rem;">
+    💡 <strong>{{ team.pokemons.count }} / 5</strong> Pokémon dans l'équipe
+</div>
+{% endif %}
+
+<div class="search-form" style="position: relative;">
+    <span
+        style="position: absolute; left: calc(50% - 230px); top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.5);">🔍</span>
+    <input type="text" id="searchInput" placeholder="Rechercher un Pokémon..." class="search-input" value="{{ query }}"
+        autocomplete="off">
+</div>
+
+<div class="pokemon-grid">
+    {% for pokemon in page_obj %}
+    <div class="pokemon-card" style="cursor: default;">
+        <div class="pokemon-number">#{{ pokemon.number }}</div>
+        <img src="{{ pokemon.sprite_url }}" alt="{{ pokemon.name }}" loading="lazy">
+        <div class="pokemon-name">{{ pokemon.name }}</div>
+        <div class="pokemon-types" style="margin-bottom: 1rem;">
+            {% for type in pokemon.types %}
+            <span class="type-badge type-{{ type }}">{{ type }}</span>
+            {% endfor %}
+        </div>
+        {% if team.pokemons.count < 5 %} <form method="post" action="{% url 'pokedex:add_pokemon_to_team' team.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="pokemon_id" value="{{ pokemon.number }}">
+            <button type="submit" class="btn" style="width: 100%; padding: 0.6rem;">+ Ajouter</button>
+            </form>
+            {% else %}
+            <button disabled class="btn"
+                style="width: 100%; padding: 0.6rem; background: #444; cursor: not-allowed; opacity: 0.5;">Équipe
+                pleine</button>
+            {% endif %}
+    </div>
+    {% empty %}
+    <p style="grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.5);">Aucun Pokémon trouvé.</p>
+    {% endfor %}
+</div>
+
+<div class="pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">← Précédent</a>
+    {% endif %}
+    <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Suivant →</a>
+    {% endif %}
+</div>
+
+<script>
+    let searchTimeout;
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', function () {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            const query = this.value.trim();
+            window.location.href = '?q=' + encodeURIComponent(query);
+        }, 500);
+    });
+</script>
+{% endblock %}

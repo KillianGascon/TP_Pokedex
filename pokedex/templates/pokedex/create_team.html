@@ -1,0 +1,29 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}Créer une Équipe - Pokédex{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 3rem auto;">
+    <h1 style="text-align: center; margin-bottom: 2rem;">Créer une Équipe</h1>
+
+    <div class="detail-container" style="padding: 2rem;">
+        <div style="width: 100%;">
+            <form method="post">
+                {% csrf_token %}
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="name"
+                        style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: rgba(255,255,255,0.7);">Nom
+                        de l'équipe</label>
+                    <input type="text" id="name" name="name" required class="search-input"
+                        style="width: 100%; border-radius: 12px; max-width: 100%;" placeholder="Ex: Mon équipe de rêve">
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn" style="flex: 1;">Créer l'équipe</button>
+                    <a href="{% url 'pokedex:team_list' %}" class="btn"
+                        style="flex: 1; background: linear-gradient(135deg, #555, #333); text-align: center;">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

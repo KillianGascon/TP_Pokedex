@@ -1,0 +1,306 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}{{ team1.name }} vs {{ team2.name }} - Combat{% endblock %}
+
+{% block content %}
+<style>
+    .battle-arena {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .fighter-box {
+        flex: 1;
+        min-width: 280px;
+        background: linear-gradient(135deg, rgba(76, 110, 245, 0.3), rgba(124, 58, 237, 0.2));
+        border: 1px solid rgba(76, 110, 245, 0.3);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .fighter-box.opponent {
+        background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 154, 158, 0.2));
+        border-color: rgba(255, 107, 107, 0.3);
+    }
+
+    .fighter-box img {
+        width: 140px;
+        height: 140px;
+        object-fit: contain;
+        filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+    }
+
+    .hp-bar-container {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        height: 16px;
+        margin: 1rem 0;
+        overflow: hidden;
+    }
+
+    .hp-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #00c853, #69f0ae);
+        transition: width 0.5s ease;
+        border-radius: 10px;
+    }
+
+    .hp-bar.low {
+        background: linear-gradient(90deg, #ff5252, #ff867c);
+    }
+
+    .team-bench {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 1.5rem;
+    }
+
+    .bench-pokemon {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 4px;
+        border: 2px solid transparent;
+    }
+
+    .bench-pokemon.fainted {
+        opacity: 0.3;
+        filter: grayscale(100%);
+    }
+
+    .battle-log {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        max-height: 150px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+    }
+
+    .battle-log p {
+        margin: 0.3rem 0;
+        padding: 0.4rem 0.6rem;
+        border-left: 3px solid var(--secondary);
+        background: rgba(76, 110, 245, 0.1);
+        border-radius: 0 6px 6px 0;
+    }
+
+    .control-panel {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .action-btn {
+        padding: 0.9rem 2rem;
+        border: none;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .attack-btn {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+        color: white;
+    }
+
+    .switch-btn {
+        background: linear-gradient(135deg, #51cf66, #37b24d);
+        color: white;
+    }
+
+    .winner-banner {
+        background: linear-gradient(135deg, #ffd43b, #fab005);
+        color: #1a1a2e;
+        padding: 2rem;
+        border-radius: 16px;
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+    }
+
+    .switch-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .switch-modal.active {
+        display: flex;
+    }
+
+    .switch-modal-content {
+        background: #1a1a3e;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2rem;
+        border-radius: 20px;
+        max-width: 450px;
+        width: 90%;
+    }
+
+    .switch-option {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .switch-option:hover {
+        border-color: var(--secondary);
+        background: rgba(76, 110, 245, 0.1);
+    }
+
+    .switch-option img {
+        width: 55px;
+        height: 55px;
+    }
+</style>
+
+{% if winner %}
+<div class="winner-banner">🏆 {{ winner }} remporte le combat! 🏆</div>
+<div style="text-align: center; margin-bottom: 2rem;">
+    <form method="post" style="display: inline;">
+        {% csrf_token %}
+        <input type="hidden" name="reset" value="1">
+        <button type="submit" class="btn">🔄 Rejouer</button>
+    </form>
+    <a href="{% url 'pokedex:combat' %}" class="btn"
+        style="background: linear-gradient(135deg, #555, #333); margin-left: 0.5rem;">← Retour</a>
+</div>
+{% else %}
+<div class="control-panel">
+    <div class="action-buttons">
+        <form method="post" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="attack">
+            <button type="submit" class="action-btn attack-btn">⚔️ Attaquer</button>
+        </form>
+        <button type="button" class="action-btn switch-btn"
+            onclick="document.getElementById('switchModal').classList.add('active')">
+            🔄 Changer
+        </button>
+        <a href="{% url 'pokedex:combat' %}" class="action-btn"
+            style="background: #444; color: white; text-decoration: none;">← Quitter</a>
+    </div>
+    <div class="battle-log">
+        <strong style="color: rgba(255,255,255,0.6);">Tour {{ turn }}</strong>
+        {% for entry in battle_log %}
+        <p>{{ entry }}</p>
+        {% empty %}
+        <p style="color: rgba(255,255,255,0.4);">Le combat commence...</p>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="battle-arena">
+    <div class="fighter-box">
+        <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem;">{{ team1.name }}</h3>
+        {% if current_p1 %}
+        <img src="{{ current_p1.sprite_url }}" alt="{{ current_p1.name }}">
+        <h2 style="margin: 0.8rem 0 0.3rem 0;">{{ current_p1.name }}</h2>
+        <div class="hp-bar-container">
+            <div class="hp-bar {% if current_p1_hp < 30 %}low{% endif %}"
+                style="width: {% widthratio current_p1_hp current_p1_max_hp 100 %}%;"></div>
+        </div>
+        <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">{{ current_p1_hp }} / {{ current_p1_max_hp }} HP
+        </div>
+        {% else %}<p>Tous K.O.!</p>{% endif %}
+        <div class="team-bench">
+            {% for item in team1_pokemon_hp %}
+            <img src="{{ item.pokemon.sprite_url }}" class="bench-pokemon {% if not item.alive %}fainted{% endif %}"
+                title="{{ item.pokemon.name }}">
+            {% endfor %}
+        </div>
+    </div>
+
+    <div style="align-self: center; font-size: 2.5rem; font-weight: 800; color: #ff6b6b;">VS</div>
+
+    <div class="fighter-box opponent">
+        <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem;">{{ team2.name }} (IA)</h3>
+        {% if current_p2 %}
+        <img src="{{ current_p2.sprite_url }}" alt="{{ current_p2.name }}">
+        <h2 style="margin: 0.8rem 0 0.3rem 0;">{{ current_p2.name }}</h2>
+        <div class="hp-bar-container">
+            <div class="hp-bar {% if current_p2_hp < 30 %}low{% endif %}"
+                style="width: {% widthratio current_p2_hp current_p2_max_hp 100 %}%;"></div>
+        </div>
+        <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">{{ current_p2_hp }} / {{ current_p2_max_hp }} HP
+        </div>
+        {% else %}<p>Tous K.O.!</p>{% endif %}
+        <div class="team-bench">
+            {% for item in team2_pokemon_hp %}
+            <img src="{{ item.pokemon.sprite_url }}" class="bench-pokemon {% if not item.alive %}fainted{% endif %}"
+                title="{{ item.pokemon.name }}">
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div id="switchModal" class="switch-modal">
+    <div class="switch-modal-content">
+        <h3 style="margin: 0 0 1rem 0;">Changer de Pokémon</h3>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="switch">
+            {% for item in team1_pokemon_hp %}
+            {% if item.alive and item.pokemon.number != current_p1.number %}
+            <label class="switch-option">
+                <input type="radio" name="switch_to" value="{{ item.pokemon.number }}" required>
+                <img src="{{ item.pokemon.sprite_url }}">
+                <div>
+                    <strong>{{ item.pokemon.name }}</strong><br>
+                    <small style="color: rgba(255,255,255,0.5);">{{ item.hp }}/{{ item.max_hp }} HP</small>
+                </div>
+            </label>
+            {% endif %}
+            {% endfor %}
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                <button type="submit" class="btn" style="flex: 1;">Confirmer</button>
+                <button type="button" class="btn" style="flex: 1; background: #444;"
+                    onclick="document.getElementById('switchModal').classList.remove('active')">Annuler</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}Tous les Pokémon - Pokédex{% endblock %}
+
+{% block content %}
+<div class="search-form" style="position: relative;">
+    <span
+        style="position: absolute; left: calc(50% - 230px); top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.5);">🔍</span>
+    <input type="text" id="searchInput" placeholder="Rechercher un Pokémon..." class="search-input" value="{{ query }}"
+        autocomplete="off">
+</div>
+
+<div id="pokemonGrid" class="pokemon-grid">
+    {% for pokemon in page_obj %}
+    <a href="{% url 'pokedex:pokemon_detail' pokemon.number %}" class="pokemon-card"
+        data-name="{{ pokemon.name|lower }}" data-number="{{ pokemon.number }}">
+        <div class="pokemon-number">#{{ pokemon.number|stringformat:"03d" }}</div>
+        <img src="{{ pokemon.sprite_url }}" alt="{{ pokemon.name }}" loading="lazy">
+        <div class="pokemon-name">{{ pokemon.name }}</div>
+        <div class="pokemon-types">
+            {% for type in pokemon.types %}
+            <span class="type-badge type-{{ type }}">{{ type }}</span>
+            {% endfor %}
+        </div>
+    </a>
+    {% empty %}
+    <p style="grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.5);">Aucun Pokémon trouvé.</p>
+    {% endfor %}
+</div>
+
+<div class="pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page=1{% if query %}&q={{ query }}{% endif %}">« Début</a>
+    <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Précédent</a>
+    {% endif %}
+
+    <span class="current">
+        {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Suivant</a>
+    <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}">Fin »</a>
+    {% endif %}
+</div>
+
+<script>
+    // Auto-search with debounce
+    let searchTimeout;
+    const searchInput = document.getElementById('searchInput');
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            const query = this.value.trim();
+            if (query.length >= 1 || query.length === 0) {
+                window.location.href = '?q=' + encodeURIComponent(query);
+            }
+        }, 500);
+    });
+
+    // Focus search on page load if empty
+    if (!searchInput.value) {
+        searchInput.focus();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}#{{ pokemon.number }} {{ pokemon.name }} - Pokédex{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="detail-image">
+        <img src="{{ pokemon.sprite_url }}" alt="{{ pokemon.name }}">
+        <div style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+            {% for type in pokemon.types %}
+            <span class="type-badge type-{{ type }}" style="font-size: 0.85rem; padding: 0.4rem 1rem;">{{ type }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="detail-info">
+        <div class="detail-header">
+            <h1 class="detail-name">{{ pokemon.name }}</h1>
+            <div class="detail-number">#{{ pokemon.number|stringformat:"03d" }}</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
+            <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px; text-align: center;">
+                <div style="color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-bottom: 0.3rem;">Taille</div>
+                <div style="font-size: 1.3rem; font-weight: 700;">{{ pokemon.height }} m</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px; text-align: center;">
+                <div style="color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-bottom: 0.3rem;">Poids</div>
+                <div style="font-size: 1.3rem; font-weight: 700;">{{ pokemon.weight }} kg</div>
+            </div>
+        </div>
+
+        <h3
+            style="margin-bottom: 1rem; font-size: 1rem; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px;">
+            Statistiques</h3>
+        <div class="stats-grid">
+            {% for stat_name, stat_value in pokemon.stats.items %}
+            <div class="stat-name">{{ stat_name }}</div>
+            <div class="stat-bar-bg">
+                <div class="stat-bar-fill" style="width: {% widthratio stat_value 255 100 %}%;"></div>
+            </div>
+            <div style="font-weight: 600; text-align: right;">{{ stat_value }}</div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 2.5rem;">
+            <a href="{% url 'pokedex:index' %}" class="btn">← Retour à la liste</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,38 +1,60 @@
-Mini-projet : réaliser un pokédex
-• A partir de l’API PokeApi, vous devez développer un pokédex en Python.
-• Votre application devra permettre d’afficher le nom du Pokémon, une image de celui-ci, ainsi
-que des informations le concernant selon votre convenance.
-• Elle devra gérer au moins les 251 premiers pokémons.
-• L’utilisateur pourra naviguer entre les pokémons et disposera d’une fonction de recherche.
-Mini-projet : réaliser un pokédex
-• Il y aura bien sûr un affichage graphique. Vous pouvez utiliser la bibliothèque graphique de
-votre choix ou bien utiliser Django (ou tout autre framework Python).
-• A l’aide du Pokédex, l’utilisateur pourra aussi former des équipes de 5 pokémons et les afficher.
-• Une petite documentation permettra de guider l’utilisateur lors de l’installation et du
-lancement du programme. Elle décrira aussi les choix que vous avez fait pour le projet.
-• Lien vers l’API : https://pokeapi.co/
-Mini-projet : réaliser un pokédex
-• Maintenant que l’utilisateur est capable de faire des équipes, vous mettrez en place un système
-de combat pour permettre au joueur de faire s’affronter deux équipes. A vous de choisir si la
-deuxième équipe est contrôlée par un autre joueur ou une IA.
-• Le système de combat est à votre discrétion. Vous pouvez faire quelque chose de très simple ou
-bien complexe suivant les objectifs que vous voulez atteindre. Néanmoins, il faut qu’il y ait de
-l’interaction de la part du joueur.
-• Bon courage !
-Modalités
-• Il s’agit d’un projet à faire en groupe de 3 à 4.
-• Rendu à effectuer pour le vendredi 23 janvier à 23h42 (possibilité de changement en fonction
-de la situation).
-• Vous avez le droit au cours, à internet, de discuter entre vous et même à la calculatrice !
-• Votre projet à envoyer à l’adresse suivante : alain.cariou@mailo.com avec en objet « [EPSI] –
-Projet Python – B3 ».
-Barème du pokédex
-• Total : / 20
- Utilisation de l’API : / 3
- Affichage d’un pokémon : / 2
- Passage d’un pokémon à un autre : / 2
- Fonction recherche : / 2
- Création, gestion et affichage des équipes : / 2
- Affichage graphique joli : / 4
- Partie combat : / 3
- Documentation : / 2
+# Documentation du Pokédex
+
+## Introduction
+Application Pokédex développée en Python avec le framework **Django**. Elle utilise l'API **PokeAPI** pour récupérer les informations des 251 premiers Pokémon.
+
+## Installation
+
+1. **Prérequis**: Python 3.10+
+2. **Installer les dépendances**:
+   ```bash
+   pip install django requests
+   ```
+3. **Initialiser la base de données**:
+   ```bash
+   python manage.py migrate
+   ```
+4. **Importer les Pokémon** (première utilisation):
+   ```bash
+   python manage.py import_pokemon
+   ```
+5. **Lancer le serveur**:
+   ```bash
+   python manage.py runserver
+   ```
+6. Ouvrir `http://127.0.0.1:8000/` dans un navigateur.
+
+## Fonctionnalités
+
+| Fonctionnalité | Description |
+|----------------|-------------|
+| **Affichage** | Grille de Pokémon avec images et types |
+| **Navigation** | Pagination pour parcourir les 251 Pokémon |
+| **Recherche** | Recherche par nom ou numéro |
+| **Détails** | Vue détaillée avec statistiques (HP, Attaque, etc.) |
+| **Équipes** | Création d'équipes de **5 Pokémon** |
+| **Combat** | Combat tour par tour entre 2 équipes |
+
+## Système de Combat
+
+Le système de combat permet d'affronter deux équipes:
+- **Équipe 1**: Contrôlée par le joueur
+- **Équipe 2**: Contrôlée par l'**IA**
+
+### Actions disponibles:
+1. **Attaquer**: Inflige des dégâts basés sur les stats Attaque/Défense
+2. **Changer de Pokémon**: Remplacer le Pokémon actif par un autre de l'équipe
+
+### Déroulement:
+1. Le joueur choisit une action
+2. L'IA riposte automatiquement
+3. Quand un Pokémon atteint 0 HP, il est K.O.
+4. L'équipe sans Pokémon valide perd
+
+## Choix Techniques
+
+- **Framework**: Django 6.0 pour sa robustesse et son ORM intégré.
+- **Base de données**: SQLite (données importées localement pour performance).
+- **Design**: CSS vanilla avec thème Pokémon (gradients, animations, badges).
+- **API**: PokeAPI v2 pour les données officielles.
+- **Combat IA**: L'adversaire attaque automatiquement chaque tour.

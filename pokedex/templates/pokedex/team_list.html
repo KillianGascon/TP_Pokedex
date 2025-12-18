@@ -1,0 +1,79 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}Mes Équipes - Pokédex{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1 style="margin: 0; font-size: 2rem;">🎮 Mes Équipes</h1>
+    <a href="{% url 'pokedex:create_team' %}" class="btn">+ Nouvelle Équipe</a>
+</div>
+
+{% if messages %}
+<div style="margin-bottom: 1rem;">
+    {% for message in messages %}
+    <div
+        style="padding: 1rem; background: {% if message.tags == 'error' %}rgba(255,82,82,0.1){% else %}rgba(76,175,80,0.1){% endif %}; border-radius: 8px; color: white; border: 1px solid {% if message.tags == 'error' %}rgba(255,82,82,0.3){% else %}rgba(76,175,80,0.3){% endif %};">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="team-list">
+    {% for team in teams %}
+    <div class="detail-container" style="padding: 1.5rem;">
+        <div style="width: 100%;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <h2 style="margin: 0; font-size: 1.4rem;">
+                    {{ team.name }}
+                    <span
+                        style="font-size: 0.9rem; color: rgba(255,255,255,0.5); font-weight: 400; margin-left: 0.5rem;">({{
+                        team.pokemons.count }} / 5)</span>
+                </h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    {% if team.pokemons.count < 5 %} <a href="{% url 'pokedex:add_pokemon_to_team' team.id %}"
+                        class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">+ Ajouter</a>
+                        {% endif %}
+                        <form action="{% url 'pokedex:delete_team' team.id %}" method="post" style="display: inline;"
+                            onsubmit="return confirm('Supprimer cette équipe ?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn"
+                                style="padding: 0.5rem 1rem; font-size: 0.85rem; background: linear-gradient(135deg, #dc3545, #a71d2a);">🗑️</button>
+                        </form>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                {% for pokemon in team.pokemons.all %}
+                <div
+                    style="display: flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.8rem 1.2rem; gap: 1rem;">
+                    <img src="{{ pokemon.sprite_url }}" alt="{{ pokemon.name }}"
+                        style="width: 50px; height: 50px; object-fit: contain;">
+                    <div>
+                        <div style="font-weight: 600;">{{ pokemon.name }}</div>
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">N°{{ pokemon.number }}</div>
+                    </div>
+                    <form action="{% url 'pokedex:remove_pokemon_from_team' team.id pokemon.number %}" method="post"
+                        style="margin-left: 0.5rem;">
+                        {% csrf_token %}
+                        <button type="submit"
+                            style="background: none; border: none; color: #ff6b6b; cursor: pointer; font-size: 1.2rem; padding: 0.3rem;"
+                            title="Retirer">✕</button>
+                    </form>
+                </div>
+                {% empty %}
+                <p style="color: rgba(255,255,255,0.4); font-style: italic;">Aucun Pokémon dans cette équipe.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="detail-container" style="text-align: center; padding: 3rem;">
+        <p style="font-size: 1.2rem; color: rgba(255,255,255,0.5); margin-bottom: 1.5rem;">Vous n'avez pas encore
+            d'équipe.</p>
+        <a href="{% url 'pokedex:create_team' %}" class="btn">Créer ma première équipe</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
