@@ -28,8 +28,8 @@
                 <h2 style="margin: 0; font-size: 1.4rem;">
                     {{ team.name }}
                     <span
-                        style="font-size: 0.9rem; color: rgba(255,255,255,0.5); font-weight: 400; margin-left: 0.5rem;">({{
-                        team.pokemons.count }} / 5)</span>
+                        style="font-size: 0.9rem; color: rgba(255,255,255,0.5); font-weight: 400; margin-left: 0.5rem;">
+                        ({{ team.pokemons.count }} / 5)</span>
                 </h2>
                 <div style="display: flex; gap: 0.5rem;">
                     {% if team.pokemons.count < 5 %} <a href="{% url 'pokedex:add_pokemon_to_team' team.id %}"
