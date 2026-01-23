@@ -4,28 +4,27 @@
 
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-    <h1 style="margin: 0; font-size: 1.8rem;">➕ Ajouter à {{ team.name }}</h1>
-    <a href="{% url 'pokedex:team_list' %}" class="btn" style="background: linear-gradient(135deg, #555, #333);">←
-        Retour</a>
+    <h1>➕ Ajouter à {{ team.name }}</h1>
+    <a href="{% url 'pokedex:team_list' %}" class="btn" style="background: var(--text-secondary);">← Retour</a>
 </div>
 
 <!-- Debug info: Count is {{ team.pokemons.count }} -->
 
 {% if team.pokemons.count >= 5 %}
-<div
-    style="padding: 1.5rem; background: rgba(255, 152, 0, 0.15); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 12px; margin-bottom: 2rem;">
-    <strong>⚠️ Équipe complète!</strong> Cette équipe a déjà 5 Pokémon.
+<div class="messages">
+    <div class="message error">
+        <strong>⚠️ Équipe complète!</strong> Cette équipe a déjà 5 Pokémon.
+    </div>
 </div>
 {% else %}
-<div
-    style="padding: 1rem; background: rgba(76, 110, 245, 0.15); border: 1px solid rgba(76, 110, 245, 0.3); border-radius: 12px; margin-bottom: 2rem;">
-    💡 <strong>{{ team.pokemons.count }} / 5</strong> Pokémon dans l'équipe
+<div class="messages">
+    <div class="message success">
+        💡 <strong>{{ team.pokemons.count }} / 5</strong> Pokémon dans l'équipe
+    </div>
 </div>
 {% endif %}
 
 <div class="search-form" style="position: relative;">
-    <span
-        style="position: absolute; left: calc(50% - 230px); top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.5);">🔍</span>
     <input type="text" id="searchInput" placeholder="Rechercher un Pokémon..." class="search-input" value="{{ query }}"
         autocomplete="off">
 </div>
@@ -47,9 +46,7 @@
             <button type="submit" class="btn" style="width: 100%; padding: 0.6rem;">+ Ajouter</button>
             </form>
             {% else %}
-            <button disabled class="btn"
-                style="width: 100%; padding: 0.6rem; background: #444; cursor: not-allowed; opacity: 0.5;">Équipe
-                pleine</button>
+            <button disabled class="btn" style="width: 100%; padding: 0.6rem; opacity: 0.5;">Équipe pleine</button>
             {% endif %}
     </div>
     {% empty %}
