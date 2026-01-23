@@ -11,6 +11,18 @@
             <span class="type-badge type-{{ type }}" style="font-size: 0.85rem; padding: 0.4rem 1rem;">{{ type }}</span>
             {% endfor %}
         </div>
+
+        <!-- Navigation Buttons -->
+        <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 1rem;">
+            {% if prev_pokemon %}
+            <a href="{% url 'pokedex:pokemon_detail' prev_pokemon.number %}" class="btn"
+                style="padding: 0.5rem 1rem; font-size: 0.9rem;">← #{{ prev_pokemon.number }}</a>
+            {% endif %}
+            {% if next_pokemon %}
+            <a href="{% url 'pokedex:pokemon_detail' next_pokemon.number %}" class="btn"
+                style="padding: 0.5rem 1rem; font-size: 0.9rem;">#{{ next_pokemon.number }} →</a>
+            {% endif %}
+        </div>
     </div>
     <div class="detail-info">
         <div class="detail-header">

@@ -25,7 +25,13 @@ def index(request):
 
 def pokemon_detail(request, pokemon_id):
     pokemon = get_object_or_404(Pokemon, number=pokemon_id)
-    return render(request, 'pokedex/pokemon_detail.html', {'pokemon': pokemon})
+    prev_pokemon = Pokemon.objects.filter(number__lt=pokemon_id).order_by('-number').first()
+    next_pokemon = Pokemon.objects.filter(number__gt=pokemon_id).order_by('number').first()
+    return render(request, 'pokedex/pokemon_detail.html', {
+        'pokemon': pokemon,
+        'prev_pokemon': prev_pokemon,
+        'next_pokemon': next_pokemon
+    })
 
 def team_list(request):
     teams = Team.objects.all()
@@ -83,6 +89,14 @@ def combat(request):
     """Team selection page for combat"""
     teams = Team.objects.filter(pokemons__isnull=False).distinct()
     return render(request, 'pokedex/combat.html', {'teams': teams})
+
+def start_combat(request):
+    if request.method == 'POST':
+        team1_id = request.POST.get('team1')
+        team2_id = request.POST.get('team2')
+        if team1_id and team2_id:
+            return redirect('pokedex:team_battle', team1_id=team1_id, team2_id=team2_id)
+    return redirect('pokedex:combat')
 
 def team_battle(request, team1_id, team2_id):
     """Turn-based team battle with player interaction"""
